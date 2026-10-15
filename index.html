@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal de Sistemas Raguife</title>
+<link rel="icon" href="raguife-simbolo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,700..900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css?v=1">
+</head>
+<body>
+<header class="topbar">
+  <a class="brandline" href="./">
+    <img src="raguife-simbolo.png" alt="" onerror="this.remove()">
+    <div>
+      <span class="wordmark">raguife</span>
+      <span class="app-sub">Portal de Sistemas</span>
+    </div>
+  </a>
+  <div id="conta" class="conta"></div>
+</header>
+
+<main>
+  <div class="page">
+    <section class="cab">
+      <div>
+        <span class="legenda">Acesso rápido</span>
+        <h1>Sistemas da equipe</h1>
+        <p>Todos os atalhos em um só lugar.</p>
+      </div>
+      <div class="busca">
+        <input id="busca" type="search" placeholder="Buscar sistema…" aria-label="Buscar sistema" autocomplete="off">
+      </div>
+    </section>
+    <div id="lista"><p class="vazio">Carregando…</p></div>
+  </div>
+</main>
+
+<div id="modal"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=1"></script>
+</body>
+</html>
