@@ -18,7 +18,19 @@ let filtro = "";
 
 /* ---------- utilidades ---------- */
 const $ = id => document.getElementById(id);
-const CORES = ["var(--verde)", "var(--oliva)", "var(--verde-2)", "var(--lima)"];
+/* Uma cor por categoria: [destaque, fundo]. Distribuídas na ordem alfabética das categorias. */
+const CORES = [
+  ["#024f2b", "#e2efe6"], // verde Raguife
+  ["#b7791f", "#fbf0dc"], // âmbar
+  ["#2c5c9e", "#e4ecf7"], // azul
+  ["#739630", "#edf4dd"], // oliva
+  ["#b5532e", "#f9e6de"], // terracota
+  ["#1f6f78", "#dff0f1"], // petróleo
+  ["#6a4c93", "#ede7f5"], // roxo
+  ["#a83f6b", "#f7e3ec"], // vinho
+  ["#8a7a12", "#f5f1d4"], // mostarda
+  ["#4a5d6b", "#e7ecef"], // grafite
+];
 const ICONE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h7v7M13 3L5 11"/></svg>';
 const semAcento = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 const urlValida = u => /^https?:\/\/\S+$/i.test(u);
@@ -87,13 +99,15 @@ function renderLista() {
       semAcento([s.nome, s.descricao, s.categoria, ...(s.links || []).map(l => l.rotulo)].join(" ")).includes(f)));
     if (!itens.length) return;
     total += itens.length;
-    const cor = `--cor:${CORES[i % CORES.length]}`;
+    const [destaque, fundo] = CORES[i % CORES.length];
+    const cor = `--cor:${destaque};--cat-bg:${fundo}`;
 
     lista.append(
-      el("div", { class: "cat-tit", style: cor },
-        el("h2", {}, cat),
-        el("span", {}, itens.length + (itens.length > 1 ? " sistemas" : " sistema"))),
-      el("div", { class: "grade" }, itens.map(s => cardSistema(s, cor)))
+      el("section", { class: "cat", style: cor },
+        el("div", { class: "cat-tit" },
+          el("h2", {}, cat),
+          el("span", {}, itens.length + (itens.length > 1 ? " sistemas" : " sistema"))),
+        el("div", { class: "grade" }, itens.map(s => cardSistema(s, cor))))
     );
   });
 
