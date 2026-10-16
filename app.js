@@ -95,6 +95,20 @@ function alternarFavorito(id) {
   toast(entrou ? "Adicionado aos favoritos." : "Removido dos favoritos.");
 }
 
+/* ---------- categorias abertas (lembradas no navegador de cada pessoa) ---------- */
+const CHAVE_ABERTAS = "portal-raguife-categorias-abertas";
+let abertas = new Set();
+try { abertas = new Set(JSON.parse(localStorage.getItem(CHAVE_ABERTAS) || "[]")); } catch { }
+
+function alternarCategoria(cat) {
+  if (filtro.trim()) return; // durante a busca tudo fica aberto
+  abertas.has(cat) ? abertas.delete(cat) : abertas.add(cat);
+  try { localStorage.setItem(CHAVE_ABERTAS, JSON.stringify([...abertas])); } catch { }
+  renderLista();
+  // devolve o foco ao botão da categoria (para quem navega pelo teclado)
+  [...document.querySelectorAll(".cat-cab button")].find(b => b.querySelector(".cat-nome")?.textContent === cat)?.focus();
+}
+
 /* ---------- ícone do site (favicon), com a inicial como reserva ---------- */
 const hostDe = s => {
   try { return new URL((s.links || []).find(l => urlValida(l.url))?.url).hostname; } catch { return ""; }
@@ -156,10 +170,18 @@ function renderLista() {
     const itens = ordenados.filter(s => (s.categoria || "Geral") === cat && casa(s));
     if (!itens.length) return;
     total += itens.length;
-    lista.append(
-      el("section", { class: "cat", style: corDe[cat] },
-        el("div", { class: "cat-tit" }, el("h2", {}, cat), el("span", {}, qtd(itens.length))),
-        el("div", { class: "grade" }, itens.map(s => cardSistema(s, corDe[cat])))));
+    // Fechadas por padrão; durante a busca, as categorias com resultado abrem sozinhas.
+    const aberta = !!f || abertas.has(cat);
+    const idGrade = "cat-" + semAcento(cat).replace(/[^a-z0-9]+/g, "-");
+    const secao = el("section", { class: "cat sanfona" + (aberta ? " aberta" : ""), style: corDe[cat] },
+      el("h2", { class: "cat-cab" },
+        el("button", { type: "button", "aria-expanded": aberta ? "true" : "false", "aria-controls": idGrade,
+          onclick: () => alternarCategoria(cat) },
+          el("span", { class: "cat-nome" }, cat),
+          el("span", { class: "cat-qtd" }, qtd(itens.length)),
+          el("span", { class: "seta", "aria-hidden": "true" }, "▾"))),
+      el("div", { class: "grade", id: idGrade, hidden: !aberta }, itens.map(s => cardSistema(s, corDe[cat]))));
+    lista.append(secao);
   });
 
   if (!total) {
