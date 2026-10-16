@@ -21,15 +21,15 @@ const $ = id => document.getElementById(id);
 /* Uma cor por categoria: [destaque, fundo]. Distribuídas na ordem alfabética das categorias. */
 const CORES = [
   ["#024f2b", "#e2efe6"], // verde Raguife
-  ["#b7791f", "#fbf0dc"], // âmbar
-  ["#2c5c9e", "#e4ecf7"], // azul
-  ["#739630", "#edf4dd"], // oliva
-  ["#b5532e", "#f9e6de"], // terracota
-  ["#1f6f78", "#dff0f1"], // petróleo
-  ["#6a4c93", "#ede7f5"], // roxo
-  ["#a83f6b", "#f7e3ec"], // vinho
-  ["#8a7a12", "#f5f1d4"], // mostarda
-  ["#4a5d6b", "#e7ecef"], // grafite
+  ["#8f5a0c", "#fbf0dc"], // âmbar
+  ["#24508c", "#e4ecf7"], // azul
+  ["#4f6a1c", "#edf4dd"], // oliva
+  ["#9c4220", "#f9e6de"], // terracota
+  ["#17616a", "#dff0f1"], // petróleo
+  ["#5b3f85", "#ede7f5"], // roxo
+  ["#8e3359", "#f7e3ec"], // vinho
+  ["#6b5d0c", "#f5f1d4"], // mostarda
+  ["#3e4f5c", "#e7ecef"], // grafite
 ];
 const ICONE = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h7v7M13 3L5 11"/></svg>';
 const semAcento = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
