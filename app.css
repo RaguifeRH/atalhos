@@ -57,7 +57,20 @@ main { padding: 24px 26px 80px; }
 .sis:hover { box-shadow: 0 12px 28px rgba(1,30,15,.10); transform: translateY(-2px); }
 .sis h3 { font-family: var(--display); font-stretch: 75%; font-weight: 900; text-transform: uppercase; font-size: 22px; line-height: 1.02; padding-right: 54px; color: var(--cor); }
 .sis p { margin: 0; font-size: 13px; color: var(--ink); opacity: .75; }
-.sis .editar { position: absolute; top: 10px; right: 10px; }
+.cantos { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.estrela { width: 32px; height: 32px; display: grid; place-items: center; background: #fff; border: 1px solid color-mix(in srgb, var(--cor) 25%, transparent);
+  color: #9aa49d; font-size: 18px; line-height: 1; cursor: pointer; padding: 0; transition: color .15s, border-color .15s, transform .15s; }
+.estrela:hover { color: #b88a00; border-color: #b88a00; transform: scale(1.06); }
+.estrela.on { color: #b88a00; border-color: #e3c25a; background: #fff8dc; }
+.estrela:focus-visible { outline: 3px solid var(--lima); outline-offset: 2px; }
+.sis-cab { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.sis h3 { padding-right: 0; overflow-wrap: anywhere; }
+.sis-ico { flex: none; width: 42px; height: 42px; display: grid; place-items: center; background: #fff; border: 1px solid color-mix(in srgb, var(--cor) 25%, transparent);
+  color: var(--cor); font-family: var(--display); font-stretch: 75%; font-weight: 900; font-size: 22px; overflow: hidden; }
+.sis-ico img { width: 26px; height: 26px; object-fit: contain; }
+.sis-ico.emoji { font-family: system-ui, "Segoe UI Emoji", "Apple Color Emoji", sans-serif; font-size: 22px; font-weight: 400; }
+.favs .cat-tit h2 { color: #8a6700; }
+.dica { margin: -6px 0 14px; font-size: 12px; color: var(--muted); }
 .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--cor) 18%, transparent); }
 .sis .links .btn { background: var(--cor); border-color: var(--cor); }
 .sis .links .btn:hover { filter: brightness(1.15); }

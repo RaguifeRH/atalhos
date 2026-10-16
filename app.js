@@ -82,6 +82,41 @@ function renderConta() {
   );
 }
 
+/* ---------- favoritos (salvos no navegador de cada pessoa) ---------- */
+const CHAVE_FAV = "portal-raguife-favoritos";
+let favoritos = new Set();
+try { favoritos = new Set(JSON.parse(localStorage.getItem(CHAVE_FAV) || "[]")); } catch { }
+
+function alternarFavorito(id) {
+  const entrou = !favoritos.has(id);
+  entrou ? favoritos.add(id) : favoritos.delete(id);
+  try { localStorage.setItem(CHAVE_FAV, JSON.stringify([...favoritos])); } catch { }
+  renderLista();
+  toast(entrou ? "Adicionado aos favoritos." : "Removido dos favoritos.");
+}
+
+/* ---------- ícone do site (favicon), com a inicial como reserva ---------- */
+const hostDe = s => {
+  try { return new URL((s.links || []).find(l => urlValida(l.url))?.url).hostname; } catch { return ""; }
+};
+let hostsRepetidos = new Set();
+
+function iconeSistema(s) {
+  const caixa = el("span", { class: "sis-ico", "aria-hidden": "true" });
+  const inicial = () => caixa.replaceChildren((s.nome || "?").trim().charAt(0).toUpperCase());
+  // 1) ícone escolhido no editor (emoji); 2) favicon do site; 3) inicial do nome
+  if (s.icone) { caixa.classList.add("emoji"); caixa.append(s.icone); return caixa; }
+  const host = hostDe(s);
+  // Sites no mesmo domínio (ex.: vários no github.io) teriam o mesmo ícone: usa a inicial.
+  if (!host || hostsRepetidos.has(host)) { inicial(); return caixa; }
+  const img = el("img", { src: `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`, alt: "", loading: "lazy" });
+  // O serviço devolve um globo genérico de 16px quando o site não tem ícone: nesse caso, usa a inicial.
+  img.addEventListener("load", () => { if (img.naturalWidth < 32) inicial(); });
+  img.addEventListener("error", inicial);
+  caixa.append(img);
+  return caixa;
+}
+
 /* ---------- lista ---------- */
 function renderLista() {
   const lista = $("lista");
@@ -93,22 +128,38 @@ function renderLista() {
   const categorias = [...new Set(ordenados.map(s => s.categoria || "Geral"))]
     .sort((a, b) => semAcento(a).localeCompare(semAcento(b)));
 
-  let total = 0;
+  const contagem = {};
+  sistemas.forEach(s => { const h = hostDe(s); if (h) contagem[h] = (contagem[h] || 0) + 1; });
+  hostsRepetidos = new Set(Object.keys(contagem).filter(h => contagem[h] > 1));
+
+  const corDe = {};
   categorias.forEach((cat, i) => {
-    const itens = ordenados.filter(s => (s.categoria || "Geral") === cat && (!f ||
-      semAcento([s.nome, s.descricao, s.categoria, ...(s.links || []).map(l => l.rotulo)].join(" ")).includes(f)));
+    const [destaque, fundo] = CORES[i % CORES.length];
+    corDe[cat] = `--cor:${destaque};--cat-bg:${fundo}`;
+  });
+  const casa = s => !f ||
+    semAcento([s.nome, s.descricao, s.categoria, ...(s.links || []).map(l => l.rotulo)].join(" ")).includes(f);
+  const qtd = n => n + (n > 1 ? " sistemas" : " sistema");
+
+  let total = 0;
+
+  // Favoritos da pessoa, no topo (cada card mantém a cor da sua categoria)
+  const favs = ordenados.filter(s => favoritos.has(s.id) && casa(s));
+  if (favs.length) {
+    lista.append(
+      el("section", { class: "cat favs", style: "--cor:#b88a00" },
+        el("div", { class: "cat-tit" }, el("h2", {}, "★ Meus favoritos"), el("span", {}, qtd(favs.length))),
+        el("div", { class: "grade" }, favs.map(s => cardSistema(s, corDe[s.categoria || "Geral"])))));
+  }
+
+  categorias.forEach(cat => {
+    const itens = ordenados.filter(s => (s.categoria || "Geral") === cat && casa(s));
     if (!itens.length) return;
     total += itens.length;
-    const [destaque, fundo] = CORES[i % CORES.length];
-    const cor = `--cor:${destaque};--cat-bg:${fundo}`;
-
     lista.append(
-      el("section", { class: "cat", style: cor },
-        el("div", { class: "cat-tit" },
-          el("h2", {}, cat),
-          el("span", {}, itens.length + (itens.length > 1 ? " sistemas" : " sistema"))),
-        el("div", { class: "grade" }, itens.map(s => cardSistema(s, cor))))
-    );
+      el("section", { class: "cat", style: corDe[cat] },
+        el("div", { class: "cat-tit" }, el("h2", {}, cat), el("span", {}, qtd(itens.length))),
+        el("div", { class: "grade" }, itens.map(s => cardSistema(s, corDe[cat])))));
   });
 
   if (!total) {
@@ -130,8 +181,14 @@ function cardSistema(s, cor) {
     a.insertAdjacentHTML("beforeend", ICONE);
     links.append(a);
   });
+  const fav = favoritos.has(s.id);
   return el("article", { class: "sis", style: cor },
-    admin ? el("button", { class: "btn sec peq editar", onclick: () => abrirEditor(s) }, "Editar") : null,
+    el("div", { class: "sis-cab" }, iconeSistema(s), el("div", { class: "cantos" },
+      el("button", { class: "estrela" + (fav ? " on" : ""), type: "button", "aria-pressed": fav ? "true" : "false",
+        title: fav ? "Remover dos favoritos" : "Adicionar aos favoritos",
+        "aria-label": (fav ? "Remover dos favoritos: " : "Adicionar aos favoritos: ") + s.nome,
+        onclick: () => alternarFavorito(s.id) }, fav ? "★" : "☆"),
+      admin ? el("button", { class: "btn sec peq", onclick: () => abrirEditor(s) }, "Editar") : null)),
     el("h3", {}, s.nome),
     s.descricao ? el("p", {}, s.descricao) : null,
     links
@@ -195,6 +252,7 @@ function abrirEditor(s = null) {
   const nome = el("input", { type: "text", id: "e-nome", value: s?.nome || "", required: true });
   const categoria = el("input", { type: "text", id: "e-cat", list: "e-cats", value: s?.categoria || "", placeholder: "Ex.: Gestão" });
   const ordem = el("input", { type: "number", id: "e-ordem", value: s?.ordem ?? "", placeholder: "Opcional" });
+  const icone = el("input", { type: "text", id: "e-ico", value: s?.icone || "", maxlength: "4", placeholder: "Ex.: 📊" });
   const descricao = el("textarea", { id: "e-desc" });
   descricao.value = s?.descricao || "";
   const linhas = el("div", {}, (s?.links?.length ? s.links : [{ rotulo: "Acessar", url: "" }]).map(linhaLink));
@@ -218,6 +276,7 @@ function abrirEditor(s = null) {
         nome: nome.value.trim(),
         categoria: categoria.value.trim() || "Geral",
         descricao: descricao.value.trim(),
+        icone: icone.value.trim(),
         ordem: ordem.value === "" ? null : Number(ordem.value),
         links,
         atualizadoEm: serverTimestamp()
@@ -231,7 +290,10 @@ function abrirEditor(s = null) {
       } catch (err) { erro.textContent = traduzErro(err); salvar.disabled = false; }
     }
   },
-    el("div", { class: "campo" }, el("label", { for: "e-nome" }, "Nome do sistema"), nome),
+    el("div", { class: "campos2 campo" },
+      el("div", {}, el("label", { for: "e-nome" }, "Nome do sistema"), nome),
+      el("div", {}, el("label", { for: "e-ico" }, "Ícone"), icone)),
+    el("p", { class: "dica" }, "Ícone é opcional: cole um emoji (no Windows, tecla Windows + ponto). Sem ele, usamos o ícone do site ou a inicial do nome."),
     el("div", { class: "campos2 campo" },
       el("div", {}, el("label", { for: "e-cat" }, "Categoria"), categoria,
         el("datalist", { id: "e-cats" }, cats.map(c => el("option", { value: c })))),
